@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer utilities {
+  /* Directional Blocked Shakes (Bump Animation) */
+  @keyframes bump-up {
+    0%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-12px); }
+    70% { transform: translateY(4px); }
+  }
+  @keyframes bump-down {
+    0%, 100% { transform: translateY(0); }
+    30% { transform: translateY(12px); }
+    70% { transform: translateY(-4px); }
+  }
+  @keyframes bump-left {
+    0%, 100% { transform: translateX(0); }
+    30% { transform: translateX(-12px); }
+    70% { transform: translateX(4px); }
+  }
+  @keyframes bump-right {
+    0%, 100% { transform: translateX(0); }
+    30% { transform: translateX(12px); }
+    70% { transform: translateX(-4px); }
+  }
+
+  /* Keyframe utility assignments */
+  .animate-bump-UP {
+    animation: bump-up 0.25s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  }
+  .animate-bump-DOWN {
+    animation: bump-down 0.25s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  }
+  .animate-bump-LEFT {
+    animation: bump-left 0.25s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  }
+  .animate-bump-RIGHT {
+    animation: bump-right 0.25s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  }
+
+  /* Sparkle exit effects */
+  @keyframes sparkle-glow {
+    0% { transform: scale(0.3); opacity: 1; filter: brightness(1.5); }
+    100% { transform: scale(1.6); opacity: 0; filter: brightness(1); }
+  }
+  .animate-sparkle {
+    animation: sparkle-glow 0.4s ease-out forwards;
+  }
+
+  /* Victory confetti backdrop pulse */
+  @keyframes pulse-bg-gold {
+    0%, 100% { background-color: rgba(250, 204, 21, 0.05); }
+    50% { background-color: rgba(250, 204, 21, 0.2); }
+  }
+  .animate-victory-pulse {
+    animation: pulse-bg-gold 2s infinite ease-in-out;
+  }
+
+  /* Floating UI components */
+  @keyframes float-ui {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+  }
+  .animate-float {
+    animation: float-ui 3s ease-in-out infinite;
+  }
+
+  /* Neon pulsing glow */
+  @keyframes neon-pulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(241, 87, 181, 0.4), inset 0 0 4px rgba(241, 87, 181, 0.2); }
+    50% { box-shadow: 0 0 16px rgba(241, 87, 181, 0.8), inset 0 0 8px rgba(241, 87, 181, 0.4); }
+  }
+  .animate-neon-glow {
+    animation: neon-pulse 2s infinite ease-in-out;
+  }
+}
+
+/* Beautiful custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.6);
+}
