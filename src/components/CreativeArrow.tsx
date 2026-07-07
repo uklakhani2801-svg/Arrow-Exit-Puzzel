@@ -34,14 +34,18 @@ export default function CreativeArrow({
 
   // Parse arrow ID to get a deterministic index for template variation inside the grid
   const arrowNumericId = parseInt(id.replace(/\D/g, '')) || 0;
-  // Choose one of 8 templates based on the arrow's numeric ID
-  const templateIndex = (arrowNumericId + levelNumber) % 8;
+  // Choose one of 12 templates based on the arrow's numeric ID to add immense variety
+  const templateIndex = (arrowNumericId + levelNumber) % 12;
 
   // Rotation angle based on direction (we design templates facing UP and rotate them)
   let rotation = 0;
   if (dir === 'RIGHT') rotation = 90;
   else if (dir === 'DOWN') rotation = 180;
   else if (dir === 'LEFT') rotation = 270;
+
+  // Adjust stroke width based on grid size for optimal clarity
+  const isLargeGrid = difficulty === 'HARD' || difficulty === 'EXPERT';
+  const strokeWidth = isLargeGrid ? '7' : '8.5';
 
   // Let's define the path and arrowhead for each template (all pointing UP by default)
   let pathD = '';
@@ -54,74 +58,146 @@ export default function CreativeArrow({
       arrowheadD = 'M 40,24 L 50,10 L 60,24 Z';
       break;
 
-    case 1: // Sharp L-Bend (Right-angle corner, just like the uploaded image!)
-      pathD = 'M 25,80 L 75,80 L 75,22';
-      arrowheadD = 'M 65,24 L 75,10 L 85,24 Z';
+    case 1: // Sharp L-Bend (Right-angle corner, exiting centered!)
+      pathD = 'M 25,80 L 50,80 L 50,22';
+      arrowheadD = 'M 40,24 L 50,10 L 60,24 Z';
       extraElements = (
         <circle cx="25" cy="80" r="4.5" className="fill-current opacity-80" />
       );
       break;
 
-    case 2: // Zig-Zag / S-Shape maze line
-      pathD = 'M 25,82 L 25,52 L 75,52 L 75,22';
-      arrowheadD = 'M 65,24 L 75,10 L 85,24 Z';
+    case 2: // S-Shape / Double-Bend Zig-Zag (Perfect classic blocky S-shape: centered & symmetric!)
+      pathD = 'M 50,80 L 25,80 L 25,50 L 75,50 L 75,20 L 50,20 L 50,12';
+      arrowheadD = 'M 40,24 L 50,10 L 60,24 Z';
       extraElements = (
         <>
-          <circle cx="25" cy="82" r="4" className="fill-current opacity-60" />
-          <circle cx="25" cy="52" r="2.5" className="fill-current opacity-30" />
-          <circle cx="75" cy="52" r="2.5" className="fill-current opacity-30" />
+          <circle cx="50" cy="80" r="4.5" className="fill-current opacity-90" />
+          {/* S-shape helper guidance dots indicating clear flow direction from bottom to top */}
+          <circle cx="25" cy="65" r="3" className="fill-current opacity-40" />
+          <circle cx="50" cy="50" r="3.5" className="fill-current opacity-70" />
+          <circle cx="75" cy="35" r="3" className="fill-current opacity-40" />
         </>
       );
       break;
 
-    case 3: // Spiral Maze (winding in on itself)
-      pathD = 'M 80,82 L 80,50 L 35,50 L 35,68 L 55,68 L 55,22';
-      arrowheadD = 'M 45,24 L 55,10 L 65,24 Z';
+    case 3: // Spiral Maze (winding in on itself, exiting centered!)
+      pathD = 'M 75,80 L 75,45 L 25,45 L 25,70 L 50,70 L 50,22';
+      arrowheadD = 'M 40,24 L 50,10 L 60,24 Z';
       extraElements = (
-        <circle cx="80" cy="82" r="4" className="fill-current opacity-80" />
+        <>
+          <circle cx="75" cy="80" r="4.5" className="fill-current opacity-80" />
+          <circle cx="75" cy="45" r="2.5" className="fill-current opacity-40" />
+          <circle cx="25" cy="45" r="2.5" className="fill-current opacity-40" />
+          <circle cx="25" cy="70" r="2.5" className="fill-current opacity-40" />
+          <circle cx="50" cy="70" r="2.5" className="fill-current opacity-40" />
+        </>
       );
       break;
 
     case 4: // T-Branch with a dead-end decoy!
-      pathD = 'M 30,82 L 30,52 L 70,52 L 70,22';
-      arrowheadD = 'M 60,24 L 70,10 L 80,24 Z';
-      // Extra dead-end decoy line
+      pathD = 'M 25,80 L 25,50 L 50,50 L 50,22';
+      arrowheadD = 'M 40,24 L 50,10 L 60,24 Z';
       extraElements = (
         <>
-          <path d="M 30,52 L 10,52" strokeWidth="8" strokeLinecap="round" className="stroke-current opacity-50" />
-          <line x1="10" y1="46" x2="10" y2="58" strokeWidth="4" className="stroke-current opacity-75" />
-          <circle cx="30" cy="82" r="4.5" className="fill-current opacity-80" />
+          {/* Decoy path */}
+          <path d="M 50,50 L 75,50" strokeWidth={strokeWidth} strokeLinecap="square" className="stroke-current opacity-50" />
+          {/* Decoy T-bar cap */}
+          <line x1="75" y1="42" x2="75" y2="58" strokeWidth={parseFloat(strokeWidth) * 0.7} className="stroke-current opacity-70" />
+          <circle cx="25" cy="80" r="4.5" className="fill-current opacity-80" />
+          <circle cx="25" cy="50" r="3" className="fill-current opacity-50" />
         </>
       );
       break;
 
-    case 5: // Soft Curved Wave (Fluid ribbon)
+    case 5: // Soft Curved Wave (Fluid ribbon, centered!)
       pathD = 'M 50,82 C 20,70 80,45 50,22';
       arrowheadD = 'M 40,24 C 45,20 48,15 50,10 C 52,15 55,20 60,24 C 54,23 46,23 40,24 Z';
       break;
 
-    case 6: // Circuit Grid loop
-      pathD = 'M 35,82 L 35,58 L 65,58 L 65,34 L 35,34 L 35,22';
-      arrowheadD = 'M 25,24 L 35,10 L 45,24 Z';
+    case 6: // Circuit Grid loop (exiting centered!)
+      pathD = 'M 30,80 L 30,50 L 70,50 L 70,30 L 50,30 L 50,22';
+      arrowheadD = 'M 40,24 L 50,10 L 60,24 Z';
       extraElements = (
         <>
-          <circle cx="65" cy="58" r="5" className="stroke-current fill-none" strokeWidth="2" />
-          <circle cx="65" cy="58" r="2" className="fill-current" />
-          <circle cx="35" cy="34" r="5" className="stroke-current fill-none" strokeWidth="2" />
-          <circle cx="35" cy="34" r="2" className="fill-current" />
+          <circle cx="30" cy="80" r="4.5" className="fill-current opacity-80" />
+          <circle cx="70" cy="50" r="5" className="stroke-current fill-none" strokeWidth="2" />
+          <circle cx="70" cy="50" r="2" className="fill-current" />
+          <circle cx="50" cy="30" r="5" className="stroke-current fill-none" strokeWidth="2" />
+          <circle cx="50" cy="30" r="2" className="fill-current" />
         </>
       );
       break;
 
-    default: // Loop-the-Loop
-      pathD = 'M 50,82 C 85,82 85,48 50,48 C 15,48 15,14 50,14 L 50,22';
+    case 7: // Loop-the-Loop / U-Turn Hook (exiting centered!)
+      pathD = 'M 30,80 L 30,35 L 70,35 L 70,58 L 50,58 L 50,22';
+      arrowheadD = 'M 40,24 L 50,10 L 60,24 Z';
+      extraElements = (
+        <>
+          <circle cx="30" cy="80" r="4.5" className="fill-current opacity-80" />
+          <circle cx="30" cy="35" r="3" className="fill-current opacity-50" />
+          <circle cx="70" cy="35" r="3" className="fill-current opacity-50" />
+          <circle cx="70" cy="58" r="3" className="fill-current opacity-50" />
+          <circle cx="50" cy="58" r="3" className="fill-current opacity-50" />
+        </>
+      );
+      break;
+
+    case 8: // Smooth S-Shape curve (Perfect S-curve: centered, smooth & extremely clear direction of flow)
+      pathD = 'M 50,82 C 15,82 15,52 50,52 C 85,52 85,22 50,22';
+      arrowheadD = 'M 40,24 L 50,10 L 60,24 Z';
+      extraElements = (
+        <>
+          <circle cx="50" cy="82" r="5.5" className="fill-current opacity-90" />
+          {/* Dynamic flowing arrows alongside the curve for ultimate clarity on active sides */}
+          <circle cx="32" cy="67" r="3.5" className="fill-current opacity-60" />
+          <circle cx="50" cy="52" r="4" className="fill-current opacity-80 animate-pulse" />
+          <circle cx="68" cy="37" r="3.5" className="fill-current opacity-60" />
+        </>
+      );
+      break;
+
+    case 9: // Y-Fork Split (Unique forked maze arrow with dead end!)
+      pathD = 'M 50,80 L 50,50 L 30,30 L 30,22';
+      arrowheadD = 'M 20,24 L 30,10 L 40,24 Z';
+      extraElements = (
+        <>
+          {/* Decoy right branch with a cross bar dead-end */}
+          <path d="M 50,50 L 70,30" strokeWidth={strokeWidth} strokeLinecap="round" className="stroke-current opacity-40" />
+          <line x1="63" y1="23" x2="77" y2="37" strokeWidth="4" className="stroke-current opacity-60" />
+          <circle cx="50" cy="80" r="4" className="fill-current opacity-80" />
+        </>
+      );
+      break;
+
+    case 10: // Helix S-Shape (Double helix twist, looks like infinity loop)
+      pathD = 'M 50,82 C 75,72 75,60 50,60 C 25,60 25,48 50,36 L 50,22';
+      arrowheadD = 'M 40,24 L 50,10 L 60,24 Z';
+      extraElements = (
+        <>
+          <circle cx="50" cy="82" r="4.5" className="fill-current opacity-80" />
+          <circle cx="62" cy="71" r="2.5" className="fill-current opacity-30" />
+          <circle cx="38" cy="49" r="2.5" className="fill-current opacity-30" />
+        </>
+      );
+      break;
+
+    case 11: // Omega Key Portal (A loop in the middle)
+      pathD = 'M 50,82 L 50,64 C 32,64 32,40 50,40 C 68,40 68,64 50,64 M 50,40 L 50,22';
+      arrowheadD = 'M 40,24 L 50,10 L 60,24 Z';
+      extraElements = (
+        <>
+          <circle cx="50" cy="82" r="4.5" className="fill-current opacity-80" />
+          <circle cx="50" cy="64" r="3" className="fill-current opacity-45" />
+          <circle cx="50" cy="40" r="3" className="fill-current opacity-45" />
+        </>
+      );
+      break;
+
+    default: // Backup straight arrow
+      pathD = 'M 50,85 L 50,22';
       arrowheadD = 'M 40,24 L 50,10 L 60,24 Z';
       break;
   }
-
-  // Adjust stroke width based on grid size for optimal clarity
-  const isLargeGrid = difficulty === 'HARD' || difficulty === 'EXPERT';
-  const strokeWidth = isLargeGrid ? '7' : '8.5';
 
   // Customize look based on Theme
   let pathStroke = 'currentColor';
