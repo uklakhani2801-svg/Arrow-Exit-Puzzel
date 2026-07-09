@@ -14,11 +14,52 @@ interface CreativeArrowProps {
  * Procedural Art Themes for Levels:
  * Cycle theme based on levelNumber to make every level look distinct!
  */
-export type ArrowArtTheme = 'MAZE_CLASSIC' | 'NEON_CIRCUIT' | 'ORGANIC_WAVE' | 'STEALTH_TECH' | 'RETRO_PIXEL';
+export type ArrowArtTheme = 'MAZE_CLASSIC' | 'GLASS_PRISM' | 'METALLIC_GOLD' | 'CHROME_GLOSS' | 'CHRONO_SPEED' | 'ELEGANT_MINIMAL';
 
 export function getLevelArtTheme(levelNumber: number): ArrowArtTheme {
-  const themes: ArrowArtTheme[] = ['MAZE_CLASSIC', 'NEON_CIRCUIT', 'ORGANIC_WAVE', 'STEALTH_TECH', 'RETRO_PIXEL'];
+  const themes: ArrowArtTheme[] = ['MAZE_CLASSIC', 'GLASS_PRISM', 'METALLIC_GOLD', 'CHROME_GLOSS', 'CHRONO_SPEED', 'ELEGANT_MINIMAL'];
   return themes[levelNumber % themes.length];
+}
+
+function getGradientColors(color: string): { start: string; end: string } {
+  const normalized = color.toUpperCase();
+  switch (normalized) {
+    case '#FF595E': // Coral Red
+      return { start: '#FF595E', end: '#FF9233' }; // Coral Red -> Warm Orange
+    case '#FFCA3A': // Vibrant Yellow
+      return { start: '#FFE169', end: '#FF9F1C' }; // Bright Yellow -> Amber Gold
+    case '#8AC926': // Fresh Green
+      return { start: '#A3E635', end: '#06B6D4' }; // Lime Green -> Cyan
+    case '#1982C4': // Sky Blue
+      return { start: '#38BDF8', end: '#6366F1' }; // Sky Blue -> Indigo
+    case '#6A4C93': // Royal Purple
+      return { start: '#A855F7', end: '#EC4899' }; // Royal Purple -> Hot Pink
+    case '#F15BB5': // Hot Pink
+      return { start: '#F472B6', end: '#FF595E' }; // Pink -> Coral Red
+    case '#00F5D4': // Teal Neon
+      return { start: '#22D3EE', end: '#0EA5E9' }; // Aqua -> Sky Blue
+    case '#FF9F1C': // Amber Orange
+      return { start: '#FB923C', end: '#EF4444' }; // Orange -> Red
+    default:
+      return { start: color, end: color };
+  }
+}
+
+function adjustColorBrightness(hex: string, percent: number): string {
+  if (!hex || hex[0] !== '#') return hex;
+  let R = parseInt(hex.substring(1, 3), 16) || 0;
+  let G = parseInt(hex.substring(3, 5), 16) || 0;
+  let B = parseInt(hex.substring(5, 7), 16) || 0;
+
+  R = Math.min(255, Math.max(0, Math.round(R * (1 + percent))));
+  G = Math.min(255, Math.max(0, Math.round(G * (1 + percent))));
+  B = Math.min(255, Math.max(0, Math.round(B * (1 + percent))));
+
+  const rHex = R.toString(16).padStart(2, '0');
+  const gHex = G.toString(16).padStart(2, '0');
+  const bHex = B.toString(16).padStart(2, '0');
+
+  return `#${rHex}${gHex}${bHex}`;
 }
 
 export default function CreativeArrow({
@@ -209,27 +250,84 @@ export default function CreativeArrow({
     // Rich classical outline just like the black ink pathways in the user's reference image
     gClassName = 'text-slate-900 dark:text-slate-100';
     svgStyle = {
-      filter: 'drop-shadow(0px 2px 2px rgba(0,0,0,0.15))',
+      filter: 'drop-shadow(0px 1.5px 2px rgba(0,0,0,0.18))',
     };
-  } else if (theme === 'NEON_CIRCUIT') {
-    // Cyber circuit tracks with glowing neon vibes
-    gClassName = 'text-cyan-400 dark:text-cyan-300';
+  } else if (theme === 'GLASS_PRISM') {
+    // Elegant crystal glass prism with dual refracting physical edges
+    gClassName = '';
     svgStyle = {
-      filter: 'drop-shadow(0 0 4px currentColor)',
+      filter: `drop-shadow(0px 2px 3px ${color}40)`,
     };
-  } else if (theme === 'ORGANIC_WAVE') {
-    // Soft flowing natural design
-    gClassName = 'text-emerald-500 dark:text-emerald-400';
-  } else if (theme === 'STEALTH_TECH') {
-    // Double lines & hard-edged chevrons
-    gClassName = 'text-amber-400 dark:text-amber-400';
+  } else if (theme === 'METALLIC_GOLD') {
+    // Luxury gold-plated metal with warm physical shadows and a specular light highlight
+    gClassName = '';
     svgStyle = {
-      filter: 'drop-shadow(0 0 2px rgba(251, 191, 36, 0.5))',
+      filter: `drop-shadow(0px 2px 4px ${color}50)`,
     };
-  } else if (theme === 'RETRO_PIXEL') {
-    // Blocky dotted feel
-    gClassName = 'text-rose-500 dark:text-rose-400';
+  } else if (theme === 'CHROME_GLOSS') {
+    // Polished high-gloss liquid chrome with an intense white specular center-line reflection
+    gClassName = '';
+    svgStyle = {
+      filter: `drop-shadow(0px 2px 4px ${color}50)`,
+    };
+  } else if (theme === 'CHRONO_SPEED') {
+    // Sports-tuned track style with light accent trails
+    gClassName = '';
+    svgStyle = {
+      filter: `drop-shadow(0px 1.5px 2px ${color}40)`,
+    };
+  } else if (theme === 'ELEGANT_MINIMAL') {
+    // Pristine high-contrast modern minimalist slate/emerald styling
+    gClassName = '';
+    svgStyle = {
+      filter: `drop-shadow(0px 1px 1px ${color}30)`,
+    };
   }
+
+  const gradientId = `grad-${id.replace(/[^a-zA-Z0-9]/g, '')}-${theme}`;
+  const baseGrad = getGradientColors(color);
+
+  let stops: { offset: string; color: string; opacity?: number }[] = [];
+
+  if (theme === 'GLASS_PRISM') {
+    stops = [
+      { offset: '0%', color: adjustColorBrightness(baseGrad.start, -0.1) },
+      { offset: '50%', color: '#FFFFFF' },
+      { offset: '100%', color: adjustColorBrightness(baseGrad.end, 0.1) },
+    ];
+  } else if (theme === 'METALLIC_GOLD') {
+    stops = [
+      { offset: '0%', color: adjustColorBrightness(color, -0.5) },
+      { offset: '50%', color: adjustColorBrightness(color, 0.5) },
+      { offset: '100%', color: adjustColorBrightness(color, -0.2) },
+    ];
+  } else if (theme === 'CHROME_GLOSS') {
+    stops = [
+      { offset: '0%', color: adjustColorBrightness(color, -0.6) },
+      { offset: '50%', color: '#FFFFFF' },
+      { offset: '100%', color: color },
+    ];
+  } else if (theme === 'CHRONO_SPEED') {
+    stops = [
+      { offset: '0%', color: color },
+      { offset: '50%', color: adjustColorBrightness(color, 0.4) },
+      { offset: '100%', color: baseGrad.end },
+    ];
+  } else if (theme === 'ELEGANT_MINIMAL') {
+    stops = [
+      { offset: '0%', color: adjustColorBrightness(color, -0.2) },
+      { offset: '50%', color: adjustColorBrightness(color, 0.1) },
+      { offset: '100%', color: color },
+    ];
+  } else {
+    stops = [
+      { offset: '0%', color: baseGrad.start },
+      { offset: '100%', color: baseGrad.end },
+    ];
+  }
+
+  const arrowStrokeColor = `url(#${gradientId})`;
+  const arrowFillColor = `url(#${gradientId})`;
 
   return (
     <svg
@@ -237,38 +335,86 @@ export default function CreativeArrow({
       className="w-full h-full select-none"
       style={svgStyle}
     >
+      <defs>
+        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+          {stops.map((stop, sIdx) => (
+            <stop 
+              key={sIdx} 
+              offset={stop.offset} 
+              stopColor={stop.color} 
+              stopOpacity={stop.opacity !== undefined ? stop.opacity : 1} 
+            />
+          ))}
+        </linearGradient>
+      </defs>
       <g
         transform={`rotate(${rotation}, 50, 50)`}
         className={`${gClassName} transition-colors duration-300`}
       >
-        {/* Render Background glow in neon themes */}
-        {theme === 'NEON_CIRCUIT' && (
+        {/* Theme-specific Unique Light Reflections & Accents (No Neon/Blur slop, purely sharp physical/refractive lights) */}
+        {theme === 'GLASS_PRISM' && (
+          <path
+            d={pathD}
+            transform="translate(2, -2)"
+            fill="none"
+            stroke="#ffffff"
+            strokeWidth={parseFloat(strokeWidth) * 0.4}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="opacity-60"
+          />
+        )}
+
+        {theme === 'CHROME_GLOSS' && (
+          <path
+            d={pathD}
+            fill="none"
+            stroke="#ffffff"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="opacity-90"
+          />
+        )}
+
+        {theme === 'METALLIC_GOLD' && (
+          <path
+            d={pathD}
+            fill="none"
+            stroke="#fffebb"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="opacity-80"
+          />
+        )}
+
+        {theme === 'CHRONO_SPEED' && (
           <path
             d={pathD}
             fill="none"
             stroke={color}
-            strokeWidth={parseFloat(strokeWidth) * 2.2}
+            strokeWidth={parseFloat(strokeWidth) * 1.3}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="opacity-20 blur-[3px]"
+            className="opacity-15"
           />
         )}
 
-        {/* Dynamic styling for Retro Pixel dotted path */}
+        {/* Base Arrow Path */}
         <path
           d={pathD}
           fill={pathFill}
-          stroke={theme === 'NEON_CIRCUIT' ? 'white' : color}
+          stroke={arrowStrokeColor}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeLinejoin="round"
-          strokeDasharray={theme === 'RETRO_PIXEL' ? '5 4' : undefined}
         />
 
         {/* Arrowhead */}
         <path
           d={arrowheadD}
-          fill={color}
+          fill={arrowFillColor}
           stroke={theme === 'MAZE_CLASSIC' ? 'rgba(0,0,0,0.2)' : 'none'}
           strokeWidth="1.5"
           strokeLinejoin="round"
@@ -276,7 +422,7 @@ export default function CreativeArrow({
 
         {/* Custom Extra Elements */}
         {extraElements && (
-          <g style={{ color }}>
+          <g style={{ color: color }}>
             {extraElements}
           </g>
         )}

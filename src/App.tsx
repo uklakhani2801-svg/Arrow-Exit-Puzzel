@@ -26,6 +26,8 @@ const INITIAL_PROGRESS: PlayerProgress = {
   coins: 200, // Gift some coins to start with so they can try the Shop!
   unlockedLevel: 1,
   levelStars: {},
+  unlockedLevelChallenge: 1,
+  levelStarsChallenge: {},
   activeSkin: 'skin_standard',
   activeTheme: 'theme_slate',
   unlockedSkins: ['skin_standard'],
@@ -105,19 +107,35 @@ export default function App() {
   }, [screen]);
 
   // Handle standard level completed
-  const handleLevelComplete = (levelNum: number, stars: number, coinsEarned: number) => {
+  const handleLevelComplete = (levelNum: number, stars: number, coinsEarned: number, mode?: GameMode) => {
     updateProgress(prev => {
       const next = { ...prev };
       
-      // Save stars if higher than before
-      const oldStars = next.levelStars[levelNum] || 0;
-      if (stars > oldStars) {
-        next.levelStars[levelNum] = stars;
-      }
+      if (mode === 'CHALLENGE') {
+        const starsMap = next.levelStarsChallenge || {};
+        const oldStars = starsMap[levelNum] || 0;
+        if (stars > oldStars) {
+          next.levelStarsChallenge = {
+            ...starsMap,
+            [levelNum]: stars,
+          };
+        }
+        
+        const unlockedLvlChallenge = next.unlockedLevelChallenge || 1;
+        if (levelNum === unlockedLvlChallenge) {
+          next.unlockedLevelChallenge = levelNum + 1;
+        }
+      } else {
+        // Save stars if higher than before
+        const oldStars = next.levelStars[levelNum] || 0;
+        if (stars > oldStars) {
+          next.levelStars[levelNum] = stars;
+        }
 
-      // Unlock next level if they cleared their highest unlocked level
-      if (levelNum === prev.unlockedLevel) {
-        next.unlockedLevel = levelNum + 1;
+        // Unlock next level if they cleared their highest unlocked level
+        if (levelNum === prev.unlockedLevel) {
+          next.unlockedLevel = levelNum + 1;
+        }
       }
 
       // Award coins
@@ -173,6 +191,7 @@ export default function App() {
             onSetScreen={setScreen}
             onSetGameMode={setGameMode}
             onSetModal={setModal}
+            onSelectLevel={handleSelectLevel}
           />
         );
       case 'LEVEL_SELECT':

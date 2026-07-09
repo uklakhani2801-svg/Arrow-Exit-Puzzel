@@ -2,13 +2,16 @@
   "name": "react-example",
   "private": true,
   "version": "0.0.0",
+  "homepage": "https://uklakhani2801-svg.github.io/Arrow-Exit-Puzzel",
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
@@ -24,6 +27,7 @@
     "vite": "^6.2.3"
   },
   "devDependencies": {
+    "@tailwindcss/node": "^4.3.2",
     "@types/canvas-confetti": "^1.9.0",
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",

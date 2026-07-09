@@ -32,6 +32,8 @@ export interface PlayerProgress {
   coins: number;
   unlockedLevel: number;
   levelStars: Record<number, number>; // levelNumber -> 1, 2, or 3
+  unlockedLevelChallenge?: number; // independent progression for Challenge Mode
+  levelStarsChallenge?: Record<number, number>; // independent stars for Challenge Mode
   activeSkin: string;
   activeTheme: string;
   unlockedSkins: string[];

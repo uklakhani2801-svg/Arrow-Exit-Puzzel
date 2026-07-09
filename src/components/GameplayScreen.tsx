@@ -1,6 +1,6 @@
 import React from 'react';
 import { PlayerProgress, GameMode, ScreenState, ArrowEntity, LevelData, Difficulty } from '../types';
-import { generateLevel, getArrowExitPath, findNextValidMove, getDynamicDifficulty } from '../utils/generator';
+import { generateLevel, getArrowExitPath, findNextValidMove, getDynamicDifficulty, getChallengeDifficulty, getTimeAttackDifficulty } from '../utils/generator';
 import { audioSynth } from '../utils/audio';
 import { 
   ArrowLeft, RotateCcw, Lightbulb, Play, AlertCircle, Timer, 
@@ -17,7 +17,7 @@ interface GameplayScreenProps {
   selectedLevelNumber: number;
   dailyDateStr?: string;
   dailyDifficulty?: Difficulty;
-  onLevelComplete: (levelNum: number, stars: number, coinsEarned: number) => void;
+  onLevelComplete: (levelNum: number, stars: number, coinsEarned: number, mode?: GameMode) => void;
   onNextLevel?: () => void;
 }
 
@@ -43,6 +43,7 @@ export default function GameplayScreen({
   const [timeRemaining, setTimeRemaining] = React.useState(45);
   const [timeAttackScore, setTimeAttackScore] = React.useState(0);
   const [timeAttackActive, setTimeAttackActive] = React.useState(false);
+  const [timeAttackLevel, setTimeAttackLevel] = React.useState(1);
 
   // Gameplay helper states
   const [bumpedArrowId, setBumpedArrowId] = React.useState<string | null>(null);
@@ -69,10 +70,16 @@ export default function GameplayScreen({
       // Create a unique integer seed using the full YYYY-MM-DD string (e.g. 20260630)
       const dateSeed = parseInt(dailyDateStr.replace(/-/g, '')) || 1;
       data = generateLevel(dateSeed, dailyDifficulty);
+    } else if (gameMode === 'TIME_ATTACK') {
+      const diff: Difficulty = getTimeAttackDifficulty(lvlNum);
+      data = generateLevel(lvlNum, diff, 'TIME_ATTACK');
+    } else if (gameMode === 'CHALLENGE') {
+      const diff: Difficulty = getChallengeDifficulty(lvlNum);
+      data = generateLevel(lvlNum, diff, 'CHALLENGE');
     } else {
-      // Classic or Challenge
+      // Classic
       const diff: Difficulty = getDynamicDifficulty(lvlNum);
-      data = generateLevel(lvlNum, diff);
+      data = generateLevel(lvlNum, diff, 'CLASSIC');
     }
 
     setLevelData(data);
@@ -92,6 +99,7 @@ export default function GameplayScreen({
       setTimeRemaining(45);
       setTimeAttackScore(0);
       setTimeAttackActive(true);
+      setTimeAttackLevel(1);
       loadLevel(1); // Start from level 1
     } else {
       loadLevel(selectedLevelNumber);
@@ -307,17 +315,25 @@ export default function GameplayScreen({
       });
     } else {
       // Classic or Challenge mode
-      onLevelComplete(selectedLevelNumber, stars, coinsReward);
+      onLevelComplete(selectedLevelNumber, stars, coinsReward, gameMode);
     }
   };
 
   // Next level trigger in victory screen
   const nextLevel = () => {
     audioSynth.playClick();
-    if (onNextLevel) {
-      onNextLevel();
+    if (gameMode === 'TIME_ATTACK') {
+      const nextLvl = timeAttackLevel + 1;
+      setTimeAttackLevel(nextLvl);
+      loadLevel(nextLvl);
+    } else if (gameMode === 'DAILY') {
+      onSetScreen('DAILY_SELECT');
     } else {
-      loadLevel(selectedLevelNumber + 1);
+      if (onNextLevel) {
+        onNextLevel();
+      } else {
+        loadLevel(selectedLevelNumber + 1);
+      }
     }
   };
 
@@ -465,7 +481,13 @@ export default function GameplayScreen({
         <button
           onClick={() => {
             audioSynth.playClick();
-            onSetScreen('LEVEL_SELECT');
+            if (gameMode === 'TIME_ATTACK') {
+              onSetScreen('MENU');
+            } else if (gameMode === 'DAILY') {
+              onSetScreen('DAILY_SELECT');
+            } else {
+              onSetScreen('LEVEL_SELECT');
+            }
           }}
           className={`p-2.5 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 text-white transition`}
         >
@@ -474,19 +496,25 @@ export default function GameplayScreen({
 
         <div className="text-center">
           <div className="text-[10px] opacity-60 font-mono font-bold uppercase tracking-widest">
-            {gameMode === 'DAILY' ? 'Daily Puzzle' : gameMode === 'TIME_ATTACK' ? 'Time Attack' : 'Classic Puzzle'}
+            {gameMode === 'DAILY' ? 'Daily Puzzle' : 
+             gameMode === 'TIME_ATTACK' ? 'Time Attack' : 
+             gameMode === 'CHALLENGE' ? 'Challenge Mode' : 
+             'Classic Puzzle'}
           </div>
           <h2 className="text-xl font-black text-white">
-            {gameMode === 'DAILY' ? 'Today' : gameMode === 'TIME_ATTACK' ? `Streak: ${timeAttackScore}` : `Level ${levelData?.levelNumber}`}
+            {gameMode === 'DAILY' ? 'Today' : 
+             gameMode === 'TIME_ATTACK' ? `Level ${timeAttackLevel} (Streak: ${timeAttackScore})` : 
+             `Level ${levelData?.levelNumber}`}
           </h2>
           {levelData && (
             <div className="text-[10px] font-extrabold text-amber-400 font-mono tracking-wide mt-0.5 uppercase">
               ✨ {
-                getLevelArtTheme(levelData.levelNumber) === 'MAZE_CLASSIC' ? 'Classic Maze' :
-                getLevelArtTheme(levelData.levelNumber) === 'NEON_CIRCUIT' ? 'Cyber Neon Circuit' :
-                getLevelArtTheme(levelData.levelNumber) === 'ORGANIC_WAVE' ? 'Organic Wave' :
-                getLevelArtTheme(levelData.levelNumber) === 'STEALTH_TECH' ? 'Stealth Tech' :
-                '8-Bit Retro Pixel'
+                getLevelArtTheme(levelData.levelNumber) === 'MAZE_CLASSIC' ? 'Classic Ink Maze' :
+                getLevelArtTheme(levelData.levelNumber) === 'GLASS_PRISM' ? 'Glass Prism Reflection' :
+                getLevelArtTheme(levelData.levelNumber) === 'METALLIC_GOLD' ? 'Metallic Gold Specular' :
+                getLevelArtTheme(levelData.levelNumber) === 'CHROME_GLOSS' ? 'Chrome Gloss Specular' :
+                getLevelArtTheme(levelData.levelNumber) === 'CHRONO_SPEED' ? 'Chrono Speed Track' :
+                'Elegant Minimal Contrast'
               }
             </div>
           )}

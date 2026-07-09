@@ -7,6 +7,7 @@ interface MainMenuScreenProps {
   onSetScreen: (screen: ScreenState) => void;
   onSetGameMode: (mode: GameMode) => void;
   onSetModal: (modal: any) => void;
+  onSelectLevel?: (levelNum: number) => void;
 }
 
 export default function MainMenuScreen({
@@ -14,6 +15,7 @@ export default function MainMenuScreen({
   onSetScreen,
   onSetGameMode,
   onSetModal,
+  onSelectLevel,
 }: MainMenuScreenProps) {
 
   const selectMode = (mode: GameMode) => {
@@ -21,6 +23,11 @@ export default function MainMenuScreen({
     onSetGameMode(mode);
     if (mode === 'DAILY') {
       onSetScreen('DAILY_SELECT');
+    } else if (mode === 'TIME_ATTACK') {
+      if (onSelectLevel) {
+        onSelectLevel(1);
+      }
+      onSetScreen('GAMEPLAY');
     } else {
       onSetScreen('LEVEL_SELECT');
     }

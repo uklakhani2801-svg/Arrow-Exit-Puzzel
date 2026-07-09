@@ -149,9 +149,12 @@ export default function LevelSelectScreen({
       {/* Levels Grid Grid */}
       <div className="grid grid-cols-4 gap-3 my-auto max-w-sm w-full mx-auto">
         {displayedLevels.map(levelNum => {
-          // In Challenge Mode, levels unlock the same as Classic or are free
-          const isLocked = levelNum > progress.unlockedLevel;
-          const stars = progress.levelStars[levelNum] || 0;
+          const isLocked = gameMode === 'CHALLENGE'
+            ? levelNum > (progress.unlockedLevelChallenge ?? 1)
+            : levelNum > progress.unlockedLevel;
+          const stars = gameMode === 'CHALLENGE'
+            ? (progress.levelStarsChallenge ?? {})[levelNum] || 0
+            : progress.levelStars[levelNum] || 0;
 
           return (
             <button

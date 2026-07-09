@@ -1,4 +1,4 @@
-import { ArrowEntity, LevelData, Difficulty, Direction } from '../types';
+import { ArrowEntity, LevelData, Difficulty, Direction, GameMode } from '../types';
 
 const DIRECTIONS: Direction[] = ['UP', 'DOWN', 'LEFT', 'RIGHT'];
 
@@ -74,7 +74,7 @@ function shuffle<T>(array: T[], random: () => number): T[] {
  * and placing arrows in reverse sequence. If we slide them in from the exit path,
  * they are guaranteed to be solvable in reverse order of placement!
  */
-export function generateLevel(levelNumber: number, difficulty: Difficulty): LevelData {
+export function generateLevel(levelNumber: number, difficulty: Difficulty, mode?: GameMode): LevelData {
   let gridSize = 5;
   let targetArrowsCount = 25;
 
@@ -98,6 +98,13 @@ export function generateLevel(levelNumber: number, difficulty: Difficulty): Leve
   else if (difficulty === 'MEDIUM') seed += 20000;
   else if (difficulty === 'HARD') seed += 30000;
   else if (difficulty === 'EXPERT') seed += 40000;
+
+  // Add distinct offset based on mode to guarantee completely different levels
+  if (mode === 'CHALLENGE') {
+    seed += 150000;
+  } else if (mode === 'TIME_ATTACK') {
+    seed += 250000;
+  }
 
   const random = createRandom(seed);
 
@@ -330,6 +337,65 @@ export function getDynamicDifficulty(lvlNum: number): Difficulty {
   const lastDigit = lvlNum % 10;
   if (lastDigit === 0) return 'MEDIUM';
   if (lastDigit === 5) return 'HARD';
+  return 'EXPERT';
+}
+
+/**
+ * Challenge Mode Difficulty Curve:
+ * Designed to provide a rich mix of Easy, Medium, and Hard right from the beginning,
+ * but with a steadily increasing baseline.
+ */
+export function getChallengeDifficulty(lvlNum: number): Difficulty {
+  const remainder = lvlNum % 10;
+  
+  if (lvlNum <= 5) {
+    if (remainder === 1 || remainder === 2) return 'EASY';
+    if (remainder === 3 || remainder === 4) return 'MEDIUM';
+    return 'HARD';
+  }
+  
+  if (lvlNum <= 25) {
+    if (remainder === 1 || remainder === 4 || remainder === 7) return 'EASY';
+    if (remainder === 2 || remainder === 5 || remainder === 8) return 'MEDIUM';
+    return 'HARD';
+  }
+  
+  if (lvlNum <= 80) {
+    if (remainder === 5) return 'EASY';
+    if (remainder === 1 || remainder === 3 || remainder === 7 || remainder === 9) return 'MEDIUM';
+    if (remainder === 0 || remainder === 4) return 'EXPERT';
+    return 'HARD';
+  }
+  
+  if (remainder === 5) return 'MEDIUM';
+  if (remainder === 2 || remainder === 4 || remainder === 8 || remainder === 0) return 'EXPERT';
+  return 'HARD';
+}
+
+/**
+ * Time Attack Mode Difficulty Curve:
+ * Fast, progressive flow of Easy, Medium, and Hard levels to keep players on their toes.
+ */
+export function getTimeAttackDifficulty(lvlNum: number): Difficulty {
+  if (lvlNum <= 2) return 'EASY';
+  if (lvlNum <= 4) return 'MEDIUM';
+  if (lvlNum <= 6) return 'EASY';
+  if (lvlNum === 7) return 'HARD';
+  
+  if (lvlNum <= 12) {
+    return lvlNum % 2 === 0 ? 'EASY' : 'MEDIUM';
+  }
+  
+  if (lvlNum <= 20) {
+    const r = lvlNum % 3;
+    if (r === 0) return 'EASY';
+    if (r === 1) return 'MEDIUM';
+    return 'HARD';
+  }
+  
+  const r = lvlNum % 4;
+  if (r === 0) return 'MEDIUM';
+  if (r === 1 || r === 2) return 'HARD';
   return 'EXPERT';
 }
 
